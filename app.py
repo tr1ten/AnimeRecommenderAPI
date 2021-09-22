@@ -46,7 +46,7 @@ def get_name(name: str):
 # 3. Expose the prediction functionality, make a prediction from the passed
 #    JSON data and return the predicted Bank Note with the confidence
 @app.post('/predict')
-def predict_banknote(data:Preferences):
+def predict_Anime(data:Preferences):
     
     user_feature = data.dict()
     k = user_feature['k']
