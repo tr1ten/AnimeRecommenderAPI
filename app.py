@@ -4,12 +4,11 @@ from Anime import Preferences
 import pickle
 import numpy as np
 import lightfm
-# 2. Create the app object
 app = FastAPI()
 pickle_in = open("pipeline.pkl","rb")
 model=pickle.load(pickle_in)
 l = pickle.load(pickle_in)
-n_users ,n_items = l[0],l[1]
+n_users ,n_items= l[0],l[1]
 anime=pickle.load(pickle_in)
 dataset=pickle.load(pickle_in)
 
@@ -27,24 +26,30 @@ def recommendME(model,anime,dataset,user_id=None,new_user_feature=None,k=5):
   scores = model.predict(user_id_map, np.arange(n_items),user_features=new_user_feature)
   rank = np.argsort(-scores)
   selected_anime_id =np.array(list(dataset.mapping()[2].keys()))[rank]
-  top_items = nanime.loc[selected_anime_id]
+  top_items = nanime.loc[selected_anime_id[np.in1d(selected_anime_id,anime['anime_id'].values)]]
 
   return top_items['name'].values[:k]      
 
-
-# 3. Index route, opens automatically on http://127.0.0.1:8000
 @app.get('/')
 def index():
-    return {'message': 'Hello, World'}
+    return {'message': 'Hello, World Its Siraj :) '}
 
-# 4. Route with a single parameter, returns the parameter within a message
-#    Located at: http://127.0.0.1:8000/AnyNameHere
-@app.get('/{name}')
-def get_name(name: str):
-    return {'Welcome ': f'{name}'}
 
-# 3. Expose the prediction functionality, make a prediction from the passed
-#    JSON data and return the predicted Bank Note with the confidence
+# @app.get('/{name}')
+# def get_name(name: str):
+#     return {'Welcome ': f'{name}'}
+
+@app.get('/model')
+def get_model():
+    return {
+        'AUC': 0.9675609469413757, 
+        'Precision@5': 0.5121231079101562,
+        'Users':60000,
+        'TotalAnime':11176,
+        'Github': 'https://github.com/tr1ten/AnimeRecommenderAPI',
+        'by':'Tr1ten'
+        }
+
 @app.post('/predict')
 def predict_Anime(data:Preferences):
     
@@ -59,9 +64,9 @@ def predict_Anime(data:Preferences):
         'recommendation': set(rec),
     }
 
-# 5. Run the API with uvicorn
-#    Will run on http://127.0.0.1:8000
+
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=8000)
     
+#run in terminal
 #uvicorn app:app --reload
