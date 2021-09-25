@@ -4,7 +4,21 @@ from Anime import Preferences
 import pickle
 import numpy as np
 import lightfm
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 pickle_in = open("pipeline.pkl","rb")
 model=pickle.load(pickle_in)
 l = pickle.load(pickle_in)
@@ -42,23 +56,20 @@ def index():
 @app.get('/model')
 def get_model():
     return {
-        'AUC': 0.9675609469413757, 
-        'Precision@5': 0.5121231079101562,
-        'Users':60000,
-        'TotalAnime':11176,
+        'AUC': 0.98, 
+        'Precision@5': 0.68,
+        'Users':55000,
+        'TotalAnime':11000,
         'Github': 'https://github.com/tr1ten/AnimeRecommenderAPI',
         'by':'Tr1ten'
         }
-
 @app.post('/predict')
 def predict_Anime(data:Preferences):
     
     user_feature = data.dict()
     k = user_feature['k']
     del user_feature['k']
-    print(user_feature)
     rec = recommendME(model,anime,dataset,new_user_feature=user_feature,k=k)
-    print(rec)
 
     return {
         'recommendation': set(rec),
